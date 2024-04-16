@@ -38,7 +38,7 @@ public class PlayerController : Agent
 
         TargetTransform.localPosition = new Vector3(25.0f, 0.0f, 3.0f);
         //transform.rotation = Quaternion.Slerp(transform.rotation, defaultRotation, rotationSpeed * Time.deltaTime);
-        transform.rotation.Set(0.0f, -90.0f, 0.0f, 0.0f);
+        TargetTransform.rotation.Set(0.0f, -90.0f, 0.0f, 0.0f);
     }
 
     public override void CollectObservations(VectorSensor sensor)
@@ -125,7 +125,7 @@ public class PlayerController : Agent
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.collider.tag == "Wall" || collision.collider.tag == "Water")
+        if (collision.collider.tag == "Wall" || collision.collider.tag == "Water" || collision.collider.tag == "Enemy" || collision.collider.tag == "Weapon")
         {
             Debug.Log("dead");
             AddReward(-1);
