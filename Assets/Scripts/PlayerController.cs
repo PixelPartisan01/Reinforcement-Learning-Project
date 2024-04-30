@@ -6,6 +6,8 @@ using System.Runtime.CompilerServices;
 using Unity.MLAgents;
 using Unity.MLAgents.Sensors;
 using UnityEngine;
+using Unity.VisualScripting;
+using System.Xml.Linq;
 
 public class PlayerController : Agent
 {
@@ -14,7 +16,10 @@ public class PlayerController : Agent
 
     public bool buttonPressed = false;
 
+    public GameObject treasure;
+
     public Transform TargetTransform;
+    public Transform Goal;
 
     public Animator animator;
 
@@ -32,13 +37,19 @@ public class PlayerController : Agent
         transform.localPosition = new Vector3(0, 0.5f, 0);
         animator = GetComponent<Animator>();
 
+        //Debug.Log(transform.localRotation.x + "; " + transform.localRotation.y + "; " + transform.localRotation.z );
+
         // Generate a random position for the treasure prefab 
         //float xPosition = UnityEngine.Random.Range(-9, 9);
         //float zPosition = UnityEngine.Random.Range(-9, 9);
 
         TargetTransform.localPosition = new Vector3(25.0f, 0.0f, 3.0f);
         //transform.rotation = Quaternion.Slerp(transform.rotation, defaultRotation, rotationSpeed * Time.deltaTime);
-        TargetTransform.rotation.Set(0.0f, -90.0f, 0.0f, 0.0f);
+        //TargetTransform.rotation.Set(0.0f, -90.0f, 0.0f, 0.0f);
+
+        transform.eulerAngles = new Vector3(0.0f, 0.0f, 0.0f);
+
+        //transform.eulerAngles = new Vector3(0.0f, UnityEngine.Random.Range(0,181) * UnityEngine.Random.Range(-1, 2), 0.0f);
     }
 
     public override void CollectObservations(VectorSensor sensor)
@@ -66,75 +77,91 @@ public class PlayerController : Agent
         if (Input.GetKey("w"))
         {
             actions[0] = 1;
-            buttonPressed = true;
+            //buttonPressed = true;
             animator.SetBool("walk", true);
         }
         if (Input.GetKey("d"))
         {
-            actions[1] = +rotationSpeed;
-            buttonPressed = true;
+            actions[1] = +0.5f;
+            //actions[1] = +rotationSpeed;
+            //buttonPressed = true;
             //animator.SetBool("walk", true);
         }
         if (Input.GetKey("a"))
         {
-            actions[1] = -rotationSpeed;
-            buttonPressed = true;
+            actions[1] = -0.5f;
+            //actions[1] = -rotationSpeed;
+            //buttonPressed = true;
             //animator.SetBool("walk", true);
         }
 
-        if(!Input.anyKey)
+        if(!Input.GetKey("w"))
         {
-            buttonPressed = false;
             animator.SetBool("walk", false);
         }
-        
     }
     
     public override void OnActionReceived(ActionBuffers actions)
     {
         var actionTaken = actions.ContinuousActions;
 
-        float horizontalInput = Input.GetAxis("Horizontal");
-        float verticalInptu = Input.GetAxis("Vertical");
-
-        Vector3 movementDirection = new Vector3(horizontalInput, 0, verticalInptu);
+        //float horizontalInput = Input.GetAxis("Horizontal");
+        //float verticalInptu = Input.GetAxis("Vertical");
 
         float actionSpeed = (actionTaken[0] + 1) / 2;
-        float actionSteering = actionTaken[1]; 
+        float actionSteering = actionTaken[1];
 
-        transform.Translate(actionSpeed * transform.forward * speed * Time.fixedDeltaTime, Space.World);
+        transform.Rotate(0, Input.GetAxis("Horizontal") + actionSteering * speed, 0);
+        var forward = transform.TransformDirection(Vector3.forward);
+        float curSpeed = actionSpeed * Input.GetAxis("Vertical");
 
-        transform.eulerAngles = new Vector3(
-                                   transform.eulerAngles.x,
-                                   transform.eulerAngles.y + actionSteering,
-                                   transform.eulerAngles.z
-                                           ); 
 
-        //transform.rotation = Quaternion.Euler(new Vector3(0, actionSteering, 0));
+        //Vector3 movementDirection = new Vector3(gameObject.transform.eulerAngles.x,
+        //                                        gameObject.transform.eulerAngles.y + actionSteering * 180,
+        //                                        gameObject.transform.eulerAngles.z);
 
-        //if(movementDirection != Vector3.zero)
-        //{
-        //    //transform.forward = movementDirection;
-        //    Quaternion toRotation = Quaternion.LookRotation(movementDirection, Vector3.up);
+        //gameObject.transform.eulerAngles = movementDirection;
 
-        //    transform.rotation = Quaternion.RotateTowards(transform.rotation, toRotation, rotationSpeed * Time.deltaTime);
-        //}
+        ////movementDirection.Normalize();
+
+        transform.Translate(forward * actionSpeed * speed * Time.deltaTime, Space.World);
 
         AddReward(-0.01f);
     }
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.collider.tag == "Wall" || collision.collider.tag == "Water" || collision.collider.tag == "Enemy" || collision.collider.tag == "Weapon")
+        if ( collision.gameObject.CompareTag("Wall") || collision.gameObject.CompareTag("Water") || collision.gameObject.CompareTag("Weapon"))
         {
-            Debug.Log("dead");
-            AddReward(-1);
+            //Debug.Log("dead");
+            //Debug.Log(Vector3.Distance(TargetTransform.transform.position, Goal.transform.position));
+            Debug.Log(Vector3.Distance(treasure.transform.localPosition, transform.localPosition));
+            AddReward(-1.0f);//+ Vector3.Distance(treasure.transform.localPosition, transform.localPosition) / 100);
             //animator.SetBool("alive", false);
             EndEpisode();
         }
-        else if (collision.collider.tag == "Treasure")
+        else if (collision.gameObject.CompareTag("Treasure"))
         {
-            AddReward(1);
+            Debug.Log("Treasure");
+            //Debug.Log(2 - Vector3.Distance(Vector3.Normalize(treasure.transform.localPosition), Vector3.Normalize(transform.localPosition)));
+            AddReward(1.0f);
+            EndEpisode();
+        }
+        else if (collision.gameObject.CompareTag("Checkpoint"))
+        {
+            AddReward(.5f);
+            EndEpisode();
+        }
+    }
+
+    public void OnTriggerEnter(Collider other)
+    {
+        //if (other.tag == "Wall" || other.tag == "Water" || other.tag == "Enemy" || other.tag == "Weapon")
+        //Debug.Log("Dead");
+        if (other.gameObject.CompareTag("Enemy"))
+        {
+            Debug.Log(Vector3.Distance(treasure.transform.localPosition, transform.localPosition));
+            AddReward(-1.0f);
             EndEpisode();
         }
     }
