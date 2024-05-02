@@ -11,31 +11,28 @@ using System.Xml.Linq;
 
 public class PlayerController : Agent
 {
-    public float speed = 1;
-    public float rotationSpeed = 1.0f;
-
-    public bool buttonPressed = false;
+    public float speed;
+    public float rotationSpeed;
 
     public GameObject treasure;
 
     public Transform TargetTransform;
     public Transform Goal;
 
-    public Animator animator;
+    private Animator animator;
 
-    //private enum ACTIONS
-    //{
-    //    LEFT = 0,
-    //    FORWARD = 1,
-    //    RIGHT = 2,
-    //    BACKWARD = 3
-    //}
+    private bool checkpont = false;
+
+    private float reward = 0.0f;
 
     public override void OnEpisodeBegin()
     {
-        
+        checkpont = false;
         transform.localPosition = new Vector3(0, 0.5f, 0);
         animator = GetComponent<Animator>();
+
+        //Debug.Log(reward);
+        //reward = 0.0f;
 
         //Debug.Log(transform.localRotation.x + "; " + transform.localRotation.y + "; " + transform.localRotation.z );
 
@@ -104,10 +101,6 @@ public class PlayerController : Agent
     public override void OnActionReceived(ActionBuffers actions)
     {
         var actionTaken = actions.ContinuousActions;
-
-        //float horizontalInput = Input.GetAxis("Horizontal");
-        //float verticalInptu = Input.GetAxis("Vertical");
-
         float actionSpeed = (actionTaken[0] + 1) / 2;
         float actionSteering = actionTaken[1];
 
@@ -115,52 +108,39 @@ public class PlayerController : Agent
         var forward = transform.TransformDirection(Vector3.forward);
         float curSpeed = actionSpeed * Input.GetAxis("Vertical");
 
-
-        //Vector3 movementDirection = new Vector3(gameObject.transform.eulerAngles.x,
-        //                                        gameObject.transform.eulerAngles.y + actionSteering * 180,
-        //                                        gameObject.transform.eulerAngles.z);
-
-        //gameObject.transform.eulerAngles = movementDirection;
-
-        ////movementDirection.Normalize();
-
         transform.Translate(forward * actionSpeed * speed * Time.deltaTime, Space.World);
 
+        //reward += -0.01f;
         AddReward(-0.01f);
     }
 
     private void OnCollisionEnter(Collision collision)
     {
-        if ( collision.gameObject.CompareTag("Wall") || collision.gameObject.CompareTag("Water") || collision.gameObject.CompareTag("Weapon"))
+        if (/*collision.gameObject.CompareTag("Wall") ||*/ collision.gameObject.CompareTag("Water"))
         {
-            //Debug.Log("dead");
-            //Debug.Log(Vector3.Distance(TargetTransform.transform.position, Goal.transform.position));
-            Debug.Log(Vector3.Distance(treasure.transform.localPosition, transform.localPosition));
-            AddReward(-1.0f);//+ Vector3.Distance(treasure.transform.localPosition, transform.localPosition) / 100);
-            //animator.SetBool("alive", false);
+            AddReward(-1.0f);
             EndEpisode();
+        }
+        else if (collision.gameObject.CompareTag("Wall"))
+        {
+            AddReward(-0.01f);
+            //AddReward((1.0f - Vector3.Distance(transform.localPosition, treasure.transform.localPosition) / 100.0f) / 10);
+            //EndEpisode();
         }
         else if (collision.gameObject.CompareTag("Treasure"))
         {
             Debug.Log("Treasure");
-            //Debug.Log(2 - Vector3.Distance(Vector3.Normalize(treasure.transform.localPosition), Vector3.Normalize(transform.localPosition)));
-            AddReward(1.0f);
-            EndEpisode();
-        }
-        else if (collision.gameObject.CompareTag("Checkpoint"))
-        {
-            AddReward(.5f);
+            SetReward(2.0f);
             EndEpisode();
         }
     }
 
     public void OnTriggerEnter(Collider other)
     {
-        //if (other.tag == "Wall" || other.tag == "Water" || other.tag == "Enemy" || other.tag == "Weapon")
-        //Debug.Log("Dead");
         if (other.gameObject.CompareTag("Enemy"))
         {
-            Debug.Log(Vector3.Distance(treasure.transform.localPosition, transform.localPosition));
+            //Debug.Log(Vector3.Distance(treasure.transform.localPosition, transform.localPosition));
+            //Debug.Log();
             AddReward(-1.0f);
             EndEpisode();
         }

@@ -618,6 +618,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Env (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 2276570145228925329, guid: a62903ef15c912c468f4b0be3e2d2369, type: 3}
+      propertyPath: m_RayLength
+      value: 8
+      objectReference: {fileID: 0}
     - target: {fileID: 2644215262770749210, guid: a62903ef15c912c468f4b0be3e2d2369, type: 3}
       propertyPath: m_LocalPosition.x
       value: 100
