@@ -1,0 +1,56 @@
+{
+    "MyBehavior": {
+        "checkpoints": [
+            {
+                "steps": 499988,
+                "file_path": "results\\Run 162\\MyBehavior\\MyBehavior-499988.onnx",
+                "reward": -0.9664713494917926,
+                "creation_time": 1715440203.209766,
+                "auxillary_file_paths": [
+                    "results\\Run 162\\MyBehavior\\MyBehavior-499988.pt"
+                ]
+            },
+            {
+                "steps": 999556,
+                "file_path": "results\\Run 162\\MyBehavior\\MyBehavior-999556.onnx",
+                "reward": -0.8187375529245897,
+                "creation_time": 1715440955.4975564,
+                "auxillary_file_paths": [
+                    "results\\Run 162\\MyBehavior\\MyBehavior-999556.pt"
+                ]
+            },
+            {
+                "steps": 1499893,
+                "file_path": "results\\Run 162\\MyBehavior\\MyBehavior-1499893.onnx",
+                "reward": -0.8057819846514109,
+                "creation_time": 1715441692.0502748,
+                "auxillary_file_paths": [
+                    "results\\Run 162\\MyBehavior\\MyBehavior-1499893.pt"
+                ]
+            },
+            {
+                "steps": 1544373,
+                "file_path": "results\\Run 162\\MyBehavior\\MyBehavior-1544373.onnx",
+                "reward": null,
+                "creation_time": 1715441752.6381676,
+                "auxillary_file_paths": [
+                    "results\\Run 162\\MyBehavior\\MyBehavior-1544373.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 1544373,
+            "file_path": "results\\Run 162\\MyBehavior.onnx",
+            "reward": null,
+            "creation_time": 1715441752.6381676,
+            "auxillary_file_paths": [
+                "results\\Run 162\\MyBehavior\\MyBehavior-1544373.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "0.28.0",
+        "torch_version": "1.7.1+cu110"
+    }
+}
